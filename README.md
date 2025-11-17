@@ -34,3 +34,55 @@
 
    * 构建 Spring Boot + Vue 架构，支持实时对话、知识文档管理及交互式问答界面。
 
+
+## 功能展示
+<img width="1070" height="383" alt="image" src="https://github.com/user-attachments/assets/700bbc90-2dff-415c-a70c-695bc9b8db22" />
+
+<img width="1061" height="2398" alt="image" src="https://github.com/user-attachments/assets/d93ce6da-e734-4635-93d4-9b0fb8cfca86" />
+
+<img width="1065" height="820" alt="image" src="https://github.com/user-attachments/assets/fb1ac6da-16d0-45ee-8a95-7e8cf41ff8e7" />
+RAG 功能示意图，展示知识检索增强生成的流程
+
+## 快速开始
+
+1. **克隆项目**
+
+```bash
+git clone https://github.com/pony8150/ai-coder-helper.git
+cd ai-coder-helper
+```
+
+2. **启动后端**
+
+* 使用 IntelliJ IDEA 打开项目
+* 运行 `AiCoderHelperApplication` 类启动 Spring Boot 后端服务
+
+3. **启动前端**
+
+```bash
+cd ai-coder-helper-frontier
+npm install
+npm run dev
+```
+
+4. **配置 Qwen 大模型 Key**
+
+* 前往 Qwen 官方申请 API Key
+* 在项目配置文件（`application-local.yml` ）中加入：
+
+```yaml
+langchain4j:
+  community:
+    dashscope:
+      chat-model:
+        model-name: qwen-plus
+        api-key: <你的Qwen API Key>
+```
+
+5. **访问系统**
+
+* 打开浏览器，访问前端地址：
+
+```
+http://localhost:3000
+```
