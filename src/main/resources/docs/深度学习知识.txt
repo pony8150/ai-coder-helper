@@ -1,0 +1,73 @@
+1.重要的函数介绍
+torch.unsqueeze(input, dim) 的作用在于，在第dim维度上增加一个维度。
+# 创建一个形状为 (3, 2) 的张量
+input = torch.tensor([[1, 2], [3, 4], [5, 6]])
+
+# 在第三个维度上增加一个维度
+output = torch.unsqueeze(input, 2)
+
+print(output)
+print(output.shape
+->
+tensor([[[1],
+         [2]],
+
+        [[3],
+         [4]],
+
+        [[5],
+         [6]]])
+torch.Size([3, 2, 1])
+
+
+2.理解问题：retain_graph=True 
+理解问题：retain_graph=True 和张量重用
+当你遇到错误 RuntimeError: Trying to backward through the graph a second time (or directly access saved tensors after they have already been freed) 时，通常意味着在计算过程中，一个张量被重复使用，导致与 PyTorch 默认行为（在调用 backward() 后释放计算图）发生冲突。
+
+以下是关键概念的分解：
+
+1. 计算图
+当你对 requires_grad=True 的张量进行操作时，PyTorch 会创建一个计算图，记录生成该数据的所有操作。此图用于反向传播。
+默认情况下，这个图在调用 backward() 后会被释放（即中间张量会被删除）以节省内存。
+2. retain_graph=True
+如果你需要在同一个图上多次执行反向传播，必须在第一次调用 backward() 时指定 retain_graph=True。这会将图保留在内存中，以便后续使用。
+3. detach()
+.detach() 方法创建一个从当前计算图中分离的新张量。用于在下一次反向传播时停止为该张量计算梯度。
+简单示例说明
+考虑一个情况，我们有一个张量 a，我们想用它进行一些操作并计算两个不同的损失。我们希望分别对这些损失进行反向传播。
+
+python
+复制代码
+import torch
+
+# 示例张量
+a = torch.tensor([2.0, 3.0], requires_grad=True)
+b = torch.tensor([4.0, 5.0], requires_grad=True)
+
+# 简单操作
+c = a + b    # 第一个操作
+d = c * 2    # 第二个操作
+
+# 计算第一个损失
+loss1 = d.sum()
+
+# 对第一个损失进行反向传播
+loss1.backward(retain_graph=True)
+
+# 由于保留了图，我们现在可以使用相同的图计算另一个损失
+e = c * 3    # 使用 `c`（它依赖于 `a` 和 `b`）的另一个操作
+loss2 = e.sum()
+
+# 对第二个损失进行反向传播
+loss2.backward()
+
+# 此时，a.grad 和 b.grad 将包含来自两次 backward 调用的累积梯度
+print(a.grad)  # 输出张量 `a` 的梯度
+print(b.grad)  # 输出张量 `b` 的梯度
+在这个例子中：
+
+第一次 backward() 调用中指定了 retain_graph=True，以将计算图保留在内存中。
+这允许 loss2.backward() 在没有错误的情况下被调用。
+没有 retain_graph=True
+如果你在第一次 backward() 调用中没有指定 retain_graph=True，当调用第二次 backward() 时会出现错误，因为图在第一次反向传播后会被释放。
+
